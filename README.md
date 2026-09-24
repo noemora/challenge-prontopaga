@@ -82,7 +82,7 @@ aunque el directorio sea simulado.
 | Comando                 | Qué hace                                     |
 | ----------------------- | -------------------------------------------- |
 | `npm run dev`           | Levanta API y SPA en paralelo                |
-| `npm test`              | Ejecuta las 116 pruebas de los tres paquetes |
+| `npm test`              | Ejecuta las 119 pruebas de los tres paquetes |
 | `npm run test:coverage` | Pruebas con informe de cobertura             |
 | `npm run typecheck`     | Verificación de tipos sin emitir             |
 | `npm run lint`          | ESLint con reglas basadas en tipos           |
@@ -340,13 +340,13 @@ se eligió ya saneada en lugar de arrastrar avisos conocidos.
 
 ## Pruebas
 
-**116 pruebas**, todas en verde:
+**119 pruebas**, todas en verde:
 
 | Paquete        | Nº  | Qué cubren                                                    |
 | -------------- | --- | ------------------------------------------------------------- |
 | `packages/rut` | 33  | Módulo 11, casos borde `K` y `0`, formatos, códigos de error  |
 | `apps/api`     | 63  | Login, JWT, autorización, validación, rate limiting, contrato |
-| `apps/web`     | 20  | Formularios, errores, validación local, expiración de sesión  |
+| `apps/web`     | 23  | Formularios, errores, validación local, expiración de sesión  |
 
 ```bash
 npm test
