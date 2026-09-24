@@ -41,8 +41,11 @@ jobs:
       - name: Formato
         run: npm run format:check
 
-      - name: Tests
-        run: npm test
+      # Se ejecuta la variante con cobertura, no `npm test` a secas, porque es el
+      # comando que documenta el README: si se rompe, debe romperse aqui y no en
+      # la maquina de quien clone el repositorio.
+      - name: Tests con cobertura
+        run: npm run test:coverage
 
       - name: Build de produccion
         run: npm run build
