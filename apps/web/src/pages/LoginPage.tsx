@@ -89,7 +89,14 @@ export function LoginPage() {
       {logoutReason ? <Alert tone="info">{logoutReason}</Alert> : null}
       {errorGeneral ? <Alert tone="error">{errorGeneral}</Alert> : null}
 
-      <form onSubmit={onSubmit} noValidate>
+      <form
+        onSubmit={(event) => {
+          // El handler es async y React espera void. `void` descarta la
+          // promesa de forma explicita; los errores ya se manejan dentro.
+          void onSubmit(event);
+        }}
+        noValidate
+      >
         <Field
           label="Email"
           type="email"
