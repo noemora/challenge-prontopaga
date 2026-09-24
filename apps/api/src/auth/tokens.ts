@@ -57,9 +57,9 @@ export function verifyAccessToken(token: string): AccessTokenPayload {
     });
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
-      throw unauthorized('TOKEN_EXPIRED', 'La sesion expiro. Vuelve a iniciar sesion.');
+      throw unauthorized('TOKEN_EXPIRED', 'La sesión expiró. Vuelve a iniciar sesión.');
     }
-    throw unauthorized('TOKEN_INVALID', 'El token de acceso no es valido.');
+    throw unauthorized('TOKEN_INVALID', 'El token de acceso no es válido.');
   }
 
   return assertPayloadShape(decoded);
@@ -74,19 +74,25 @@ export function verifyAccessToken(token: string): AccessTokenPayload {
  */
 function assertPayloadShape(decoded: unknown): AccessTokenPayload {
   if (typeof decoded !== 'object' || decoded === null) {
-    throw unauthorized('TOKEN_INVALID', 'El token de acceso no es valido.');
+    throw unauthorized('TOKEN_INVALID', 'El token de acceso no es válido.');
   }
 
-  const { sub, role, rut } = decoded as Record<string, unknown>;
+  const { sub, role, rut, exp } = decoded as Record<string, unknown>;
 
   if (typeof sub !== 'string' || sub === '' || !isRole(role)) {
-    throw unauthorized('TOKEN_INVALID', 'El token de acceso no es valido.');
+    throw unauthorized('TOKEN_INVALID', 'El token de acceso no es válido.');
+  }
+  // jsonwebtoken solo comprueba `exp` si viene presente: un token emitido sin
+  // expiracion se aceptaria indefinidamente. Se exige de forma explicita para
+  // que la vigencia acotada sea una garantia real y no una convencion.
+  if (typeof exp !== 'number') {
+    throw unauthorized('TOKEN_INVALID', 'El token de acceso debe declarar su expiración.');
   }
   if (role === 'user' && typeof rut !== 'string') {
     throw unauthorized('TOKEN_INVALID', 'El token de un usuario debe incluir su RUT.');
   }
   if (rut !== undefined && typeof rut !== 'string') {
-    throw unauthorized('TOKEN_INVALID', 'El token de acceso no es valido.');
+    throw unauthorized('TOKEN_INVALID', 'El token de acceso no es válido.');
   }
 
   return rut === undefined ? { sub, role } : { sub, role, rut };

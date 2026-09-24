@@ -21,7 +21,7 @@ function consultar(rut: string, token?: string) {
 }
 
 describe('GET /score/:rut — autenticacion', () => {
-  it('rechaza la peticion sin token', async () => {
+  it('rechaza la petición sin token', async () => {
     const response = await consultar(CREDENCIALES.juan.rut);
 
     expect(response.status).toBe(401);
@@ -35,6 +35,14 @@ describe('GET /score/:rut — autenticacion', () => {
 
     expect(response.status).toBe(401);
     expect(response.body.error.code).toBe('TOKEN_MISSING');
+  });
+
+  it('acepta el esquema Bearer sin distinguir mayusculas (RFC 7235)', async () => {
+    const response = await request(app)
+      .get('/score/' + encodeURIComponent(CREDENCIALES.juan.rut))
+      .set('Authorization', 'bearer ' + tokenJuan);
+
+    expect(response.status).toBe(200);
   });
 
   it('rechaza un token manipulado', async () => {
@@ -149,6 +157,15 @@ describe('GET /score/:rut — respuesta', () => {
     expect(Number.isInteger(response.body.score)).toBe(true);
     expect(response.body.score).toBeGreaterThanOrEqual(0);
     expect(response.body.score).toBeLessThanOrEqual(100);
+  });
+
+  it('impide que la respuesta se almacene en cache', async () => {
+    const response = await consultar(CREDENCIALES.juan.rut, tokenJuan);
+
+    // El score es informacion financiera personal: no debe quedar cacheada en
+    // el navegador ni en ningun intermediario, ni ser revalidable por ETag.
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.headers['etag']).toBeUndefined();
   });
 
   it('usa el formato ISO 8601 en UTC para la fecha', async () => {

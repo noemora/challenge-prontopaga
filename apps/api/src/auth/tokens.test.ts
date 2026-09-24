@@ -109,6 +109,18 @@ describe('verifyAccessToken', () => {
     expect(codeOfThrown(() => verifyAccessToken(rolRaro))).toBe('TOKEN_INVALID');
   });
 
+  it('rechaza un token sin expiracion', () => {
+    // jsonwebtoken solo valida `exp` si esta presente; sin esta comprobacion un
+    // token emitido sin expiracion valdria para siempre.
+    const sinExp = jwt.sign({ role: 'admin' }, SECRET, {
+      algorithm: 'HS256',
+      subject: 'usr_1',
+      issuer: ISSUER,
+      audience: AUDIENCE,
+    });
+    expect(codeOfThrown(() => verifyAccessToken(sinExp))).toBe('TOKEN_INVALID');
+  });
+
   it('rechaza basura que no es un JWT', () => {
     expect(codeOfThrown(() => verifyAccessToken('esto-no-es-un-token'))).toBe('TOKEN_INVALID');
   });

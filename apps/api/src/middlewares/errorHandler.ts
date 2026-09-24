@@ -14,6 +14,55 @@ interface ErrorBody {
 }
 
 /**
+ * Errores que body-parser expone como fallos del cliente.
+ *
+ * Todos llegan con `status`, `expose: true` y un `type` estable. Sin este mapeo
+ * caian al ramal generico y se respondian como 500, lo que tiene tres efectos
+ * indeseables: se atribuye al servidor un error que es del cliente, se registra
+ * un stack completo por cada peticion malformada —sin autenticacion previa— y,
+ * fuera de produccion, el mensaje interno viaja al cliente.
+ */
+const ERRORES_DE_CUERPO: Record<string, { status: number; code: string; message: string }> = {
+  'entity.parse.failed': {
+    status: 400,
+    code: 'INVALID_JSON',
+    message: 'El cuerpo de la petición no es JSON válido.',
+  },
+  'entity.too.large': {
+    status: 413,
+    code: 'PAYLOAD_TOO_LARGE',
+    message: 'El cuerpo de la petición supera el tamaño máximo permitido.',
+  },
+  'encoding.unsupported': {
+    status: 415,
+    code: 'UNSUPPORTED_ENCODING',
+    message: 'La codificación del cuerpo no está soportada.',
+  },
+  'charset.unsupported': {
+    status: 415,
+    code: 'UNSUPPORTED_CHARSET',
+    message: 'El juego de caracteres del cuerpo no está soportado.',
+  },
+  'request.aborted': {
+    status: 400,
+    code: 'REQUEST_ABORTED',
+    message: 'La petición se interrumpió antes de completarse.',
+  },
+};
+
+/** True si el error proviene de body-parser y esta pensado para exponerse al cliente. */
+function esErrorDeCuerpo(error: unknown): error is { type: string } {
+  // El operador `in` ya estrecha el tipo, asi que no hacen falta aserciones.
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'type' in error &&
+    typeof error.type === 'string' &&
+    error.type in ERRORES_DE_CUERPO
+  );
+}
+
+/**
  * Manejador de errores central.
  *
  * Todo error termina aqui con una forma estable `{ error: { code, message } }`.
@@ -44,16 +93,17 @@ export function errorHandler(
     return;
   }
 
-  // JSON malformado en el body: body-parser lanza un SyntaxError con `status`.
-  if (
-    error instanceof SyntaxError &&
-    'status' in error &&
-    (error as { status: number }).status === 400
-  ) {
-    res.status(400).json({
-      error: { code: 'INVALID_JSON', message: 'El cuerpo de la peticion no es JSON valido.' },
-    });
-    return;
+  if (esErrorDeCuerpo(error)) {
+    const mapeado = ERRORES_DE_CUERPO[error.type];
+    if (mapeado) {
+      // Se registra a nivel debug, no error: es un fallo del cliente y no
+      // deberia ensuciar las alertas ni permitir que un tercero inunde el log.
+      logger.debug({ tipo: error.type, path: req.path }, 'Cuerpo de peticion rechazado');
+      res.status(mapeado.status).json({
+        error: { code: mapeado.code, message: mapeado.message },
+      });
+      return;
+    }
   }
 
   logger.error({ err: error, path: req.path, method: req.method }, 'Error no controlado');
@@ -62,7 +112,7 @@ export function errorHandler(
     error: {
       code: 'INTERNAL_ERROR',
       message: isProduction
-        ? 'Ocurrio un error inesperado. Intenta nuevamente en unos momentos.'
+        ? 'Ocurrió un error inesperado. Intenta nuevamente en unos momentos.'
         : `Error interno: ${error instanceof Error ? error.message : String(error)}`,
     },
   });

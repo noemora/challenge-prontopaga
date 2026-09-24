@@ -1,4 +1,4 @@
-import { Router, type Request, type Response } from 'express';
+import { Router, type NextFunction, type Request, type Response } from 'express';
 import { calculateScore } from '../domain/score.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { authorizeRutAccess } from '../middlewares/authorizeRut.js';
@@ -22,9 +22,15 @@ scoreRouter.get(
   authenticate,
   validateRutParam,
   authorizeRutAccess,
-  (req: Request, res: Response) => {
-    // `validateRutParam` garantiza que req.rut existe al llegar aqui.
-    const rut = req.rut!;
+  (req: Request, res: Response, next: NextFunction) => {
+    const rut = req.rut;
+    // `validateRutParam` garantiza que req.rut existe al llegar aqui. Se
+    // comprueba igualmente en vez de afirmarlo con "!": si alguien reordenara
+    // los middlewares, esto falla de forma explicita en lugar de reventar.
+    if (!rut) {
+      next(new Error('validateRutParam debe ejecutarse antes de este handler.'));
+      return;
+    }
 
     res.status(200).json({
       rut: rut.formatted,

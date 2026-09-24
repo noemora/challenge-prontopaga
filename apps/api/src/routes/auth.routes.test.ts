@@ -51,6 +51,14 @@ describe('POST /login', () => {
     expect(response.status).toBe(200);
   });
 
+  it('impide que la respuesta con el token se almacene en cache', async () => {
+    const response = await request(app).post('/login').send(CREDENCIALES.juan);
+
+    // La respuesta contiene un JWT: cachearla lo dejaria accesible a quien use
+    // el equipo despues.
+    expect(response.headers['cache-control']).toBe('no-store');
+  });
+
   it('nunca devuelve la contraseña ni su hash', async () => {
     const response = await request(app).post('/login').send(CREDENCIALES.juan);
     const serialized = JSON.stringify(response.body);
@@ -106,6 +114,18 @@ describe('POST /login', () => {
       expect(response.status).toBe(200);
       // El rol viene del directorio, nunca de lo que el cliente envie.
       expect(response.body.user.role).toBe('user');
+    });
+
+    it('rechaza un cuerpo demasiado grande con 413, no con 500', async () => {
+      // El limite de tamano es un control anti-DoS: reportarlo como error del
+      // servidor lo disfrazaria de fallo propio y ensuciaria la monitorizacion.
+      const response = await request(app)
+        .post('/login')
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify({ email: 'a@b.cl', password: 'x'.repeat(20_000) }));
+
+      expect(response.status).toBe(413);
+      expect(response.body.error.code).toBe('PAYLOAD_TOO_LARGE');
     });
 
     it('rechaza un cuerpo que no es JSON valido', async () => {

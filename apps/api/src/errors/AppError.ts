@@ -27,9 +27,3 @@ export const unauthorized = (code: string, message: string): AppError =>
 
 export const forbidden = (code: string, message: string): AppError =>
   new AppError(403, code, message);
-
-export const notFound = (code: string, message: string): AppError =>
-  new AppError(404, code, message);
-
-export const tooManyRequests = (code: string, message: string): AppError =>
-  new AppError(429, code, message);

@@ -19,16 +19,34 @@ const envSchema = z.object({
   JWT_ISSUER: z.string().min(1).default('prontopaga-riesgo-api'),
   JWT_AUDIENCE: z.string().min(1).default('prontopaga-riesgo-web'),
 
-  /** Lista blanca de origenes CORS. Sin comodines: en fintech el "*" no es aceptable. */
+  /**
+   * Lista blanca de origenes CORS. Sin comodines: en fintech el "*" no es aceptable.
+   *
+   * Se incluyen por defecto localhost y 127.0.0.1 porque el navegador los trata
+   * como origenes distintos. Omitir el segundo hace que la SPA falle con un
+   * "no se pudo conectar" indistinguible de un servidor caido si quien la abre
+   * escribe la IP en vez del nombre.
+   */
   CORS_ORIGINS: z
     .string()
-    .default('http://localhost:5173')
+    .default('http://localhost:5173,http://127.0.0.1:5173')
     .transform((value) =>
       value
         .split(',')
         .map((origin) => origin.trim())
         .filter(Boolean),
     ),
+
+  /**
+   * Valor para `trust proxy` de Express. Vacio = desactivado.
+   *
+   * Solo debe activarse cuando hay un proxy de confianza por delante (ALB,
+   * nginx, ingress). Activarlo sin proxy permitiria a cualquiera falsificar su
+   * IP con X-Forwarded-For y evadir el rate limiting; no activarlo detras de un
+   * proxy hace que todas las peticiones compartan la IP del balanceador y que
+   * el limite se vuelva global para todos los usuarios.
+   */
+  TRUST_PROXY: z.string().default(''),
 
   LOGIN_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
   LOGIN_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
@@ -46,7 +64,7 @@ function loadEnv(): Env {
       .map((issue) => `  - ${issue.path.join('.')}: ${issue.message}`)
       .join('\n');
     // Se escribe a stderr y se aborta: el logger todavia no existe en este punto.
-    console.error(`\nConfiguracion invalida. Revisa tu archivo .env:\n${detail}\n`);
+    console.error(`\nConfiguración inválida. Revisa tu archivo .env:\n${detail}\n`);
     process.exit(1);
   }
 

@@ -1,4 +1,4 @@
-import express, { type Express } from 'express';
+import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -30,6 +30,19 @@ const globalRateLimiter = rateLimit({
 });
 
 /**
+ * Impide que las respuestas se almacenen en cache.
+ *
+ * Tanto el score como el token son datos sensibles: el primero es informacion
+ * financiera de una persona y el segundo es una credencial. Sin `no-store`, el
+ * navegador y cualquier intermediario pueden cachearlas de forma heuristica, y
+ * quedarian accesibles para quien use el equipo despues.
+ */
+function sinCache(_req: Request, res: Response, next: NextFunction): void {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+}
+
+/**
  * Construye la aplicacion Express.
  *
  * Se expone como factory y no como instancia global para que los tests puedan
@@ -41,6 +54,18 @@ const globalRateLimiter = rateLimit({
  */
 export function createApp(): Express {
   const app = express();
+
+  // Un ETag sobre una respuesta autenticada la vuelve revalidable por
+  // intermediarios. Para una API que devuelve datos personales no aporta nada.
+  app.set('etag', false);
+
+  // Sin proxy de por medio, Express usa la IP de la conexion, que es lo seguro:
+  // nadie puede evadir el rate limiting falsificando X-Forwarded-For. Detras de
+  // un balanceador hay que declararlo, o todas las peticiones compartirian la IP
+  // del proxy y el limite pasaria a ser global para todos los usuarios.
+  if (env.TRUST_PROXY) {
+    app.set('trust proxy', env.TRUST_PROXY);
+  }
 
   // Cabeceras de seguridad (CSP, HSTS, X-Content-Type-Options, etc.) y
   // eliminacion de X-Powered-By, que revela la tecnologia del servidor.
@@ -64,17 +89,31 @@ export function createApp(): Express {
     }),
   );
 
-  // Cota al tamaño del body: sin limite, un POST gigante es una denegacion de
-  // servicio trivial contra la memoria del proceso.
-  app.use(express.json({ limit: '10kb' }));
-
   if (!isTest) {
-    app.use(pinoHttp({ logger }));
+    app.use(
+      pinoHttp({
+        logger,
+        // La sonda de vida se consulta cada pocos segundos; registrarla ahogaria
+        // el resto de los eventos sin aportar informacion.
+        autoLogging: { ignore: (req) => req.url === '/health' },
+      }),
+    );
   }
+
+  // La sonda va ANTES del limitador: si la API queda saturada, el orquestador
+  // necesita seguir distinguiendo "proceso vivo" de "proceso caido". Un 429 en
+  // el healthcheck provocaria un reinicio justo cuando menos conviene.
+  app.use(healthRouter);
 
   app.use(globalRateLimiter);
 
-  app.use(healthRouter);
+  // El parseo del cuerpo va DESPUES del limitador. Al reves, un cuerpo enorme
+  // consumia memoria y generaba un error antes de que ningun limite pudiera
+  // frenarlo, lo que convertia la propia proteccion en un vector de abuso.
+  app.use(express.json({ limit: '10kb' }));
+
+  app.use(sinCache);
+
   app.use(authRouter);
   app.use(scoreRouter);
 
