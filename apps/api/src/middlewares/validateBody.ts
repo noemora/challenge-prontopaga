@@ -17,7 +17,7 @@ export function validateBody<TSchema extends ZodTypeAny>(schema: TSchema): Reque
     } catch (error) {
       if (error instanceof ZodError) {
         next(
-          badRequest('VALIDATION_ERROR', 'Los datos enviados no son validos.', {
+          badRequest('VALIDATION_ERROR', 'Los datos enviados no son válidos.', {
             issues: error.issues.map((issue) => ({
               field: issue.path.join('.'),
               message: issue.message,

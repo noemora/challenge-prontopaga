@@ -89,19 +89,19 @@ export function parseRut(input: string): ParsedRut {
   const cleaned = input.replace(/[.\-\s]/g, '').toUpperCase();
 
   if (cleaned.length < 2) {
-    throw new InvalidRutError('RUT_MALFORMED', 'El RUT debe incluir cuerpo y digito verificador.');
+    throw new InvalidRutError('RUT_MALFORMED', 'El RUT debe incluir cuerpo y dígito verificador.');
   }
 
   const dv = cleaned.slice(-1);
   const rawBody = cleaned.slice(0, -1);
 
   if (!/^\d+$/.test(rawBody)) {
-    throw new InvalidRutError('RUT_MALFORMED', 'El cuerpo del RUT solo puede contener digitos.');
+    throw new InvalidRutError('RUT_MALFORMED', 'El cuerpo del RUT solo puede contener dígitos.');
   }
   if (!/^[\dK]$/.test(dv)) {
     throw new InvalidRutError(
       'RUT_MALFORMED',
-      'El digito verificador debe ser un numero o la letra K.',
+      'El dígito verificador debe ser un número o la letra K.',
     );
   }
 
@@ -112,7 +112,7 @@ export function parseRut(input: string): ParsedRut {
   if (body.length < MIN_BODY_LENGTH || body.length > MAX_BODY_LENGTH) {
     throw new InvalidRutError(
       'RUT_OUT_OF_RANGE',
-      `El cuerpo del RUT debe tener entre ${MIN_BODY_LENGTH} y ${MAX_BODY_LENGTH} digitos.`,
+      `El cuerpo del RUT debe tener entre ${MIN_BODY_LENGTH} y ${MAX_BODY_LENGTH} dígitos.`,
     );
   }
 
@@ -120,7 +120,7 @@ export function parseRut(input: string): ParsedRut {
   if (dv !== expectedDv) {
     throw new InvalidRutError(
       'RUT_INVALID_DV',
-      'El digito verificador no corresponde al cuerpo del RUT.',
+      'El dígito verificador no corresponde al cuerpo del RUT.',
       expectedDv,
     );
   }

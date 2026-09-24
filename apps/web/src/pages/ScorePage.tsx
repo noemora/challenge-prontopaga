@@ -70,7 +70,7 @@ function ScoreForm({ session, cerrarSesion }: ScoreFormProps) {
       const { error } = parseado;
       setErrorCampo(
         error.code === 'RUT_INVALID_DV' && error.expectedDv
-          ? `El digito verificador no corresponde: para este cuerpo deberia ser "${error.expectedDv}".`
+          ? `El dígito verificador no corresponde: para este cuerpo debería ser "${error.expectedDv}".`
           : error.message,
       );
       setResultado(null);
@@ -101,7 +101,7 @@ function ScoreForm({ session, cerrarSesion }: ScoreFormProps) {
         // Un token expirado o invalido termina la sesion y explica por que, en
         // lugar de dejar al usuario reintentando contra un 401 silencioso.
         if (error.isSessionExpired) {
-          cerrarSesion(`${error.message} Vuelve a iniciar sesion para continuar.`);
+          cerrarSesion(`${error.message} Vuelve a iniciar sesión para continuar.`);
           return;
         }
         if (error.code === 'RUT_INVALID') {
@@ -127,7 +127,7 @@ function ScoreForm({ session, cerrarSesion }: ScoreFormProps) {
       <p className="tarjeta__subtitulo">
         {esAdmin
           ? 'Tu perfil de administrador permite consultar el score de cualquier RUT.'
-          : 'Tu perfil permite consultar unicamente el RUT asociado a tu cuenta.'}
+          : 'Tu perfil permite consultar únicamente el RUT asociado a tu cuenta.'}
       </p>
 
       {errorGeneral ? <Alert tone="error">{errorGeneral}</Alert> : null}

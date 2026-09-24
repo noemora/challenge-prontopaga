@@ -30,9 +30,9 @@ function validar(email: string, password: string): ErroresFormulario {
 
   if (email.trim() === '') errores.email = 'Ingresa tu email.';
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-    errores.email = 'El email no tiene un formato valido.';
+    errores.email = 'El email no tiene un formato válido.';
 
-  if (password === '') errores.password = 'Ingresa tu contrasena.';
+  if (password === '') errores.password = 'Ingresa tu contraseña.';
 
   return errores;
 }
@@ -63,7 +63,7 @@ export function LoginPage() {
       setErrorGeneral(
         error instanceof ApiError
           ? error.message
-          : 'No se pudo iniciar sesion. Intenta nuevamente.',
+          : 'No se pudo iniciar sesión. Intenta nuevamente.',
       );
       // La contrasena se limpia tras un fallo para no dejarla en el DOM.
       setPassword('');
@@ -81,7 +81,7 @@ export function LoginPage() {
 
   return (
     <div className="tarjeta">
-      <h1 className="tarjeta__titulo">Iniciar sesion</h1>
+      <h1 className="tarjeta__titulo">Iniciar sesión</h1>
       <p className="tarjeta__subtitulo">Accede para consultar el score de riesgo financiero.</p>
 
       {logoutReason ? <Alert tone="info">{logoutReason}</Alert> : null}
@@ -108,7 +108,7 @@ export function LoginPage() {
         />
 
         <Field
-          label="Contrasena"
+          label="Contraseña"
           type="password"
           name="password"
           autoComplete="current-password"

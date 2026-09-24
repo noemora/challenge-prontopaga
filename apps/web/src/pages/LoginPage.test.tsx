@@ -21,9 +21,9 @@ describe('LoginPage', () => {
   it('muestra el formulario de inicio de sesion', () => {
     renderConProveedores(<LoginPage />);
 
-    expect(screen.getByRole('heading', { name: /iniciar sesion/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /iniciar sesión/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/contrasena/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/contraseña/i)).toBeInTheDocument();
   });
 
   it('valida los campos vacios sin llamar a la API', async () => {
@@ -33,7 +33,7 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('button', { name: /entrar/i }));
 
     expect(await screen.findByText(/ingresa tu email/i)).toBeInTheDocument();
-    expect(screen.getByText(/ingresa tu contrasena/i)).toBeInTheDocument();
+    expect(screen.getByText(/ingresa tu contraseña/i)).toBeInTheDocument();
     expect(loginMock).not.toHaveBeenCalled();
   });
 
@@ -42,10 +42,10 @@ describe('LoginPage', () => {
     renderConProveedores(<LoginPage />);
 
     await user.type(screen.getByLabelText(/email/i), 'esto-no-es-un-email');
-    await user.type(screen.getByLabelText(/contrasena/i), 'cualquiera');
+    await user.type(screen.getByLabelText(/contraseña/i), 'cualquiera');
     await user.click(screen.getByRole('button', { name: /entrar/i }));
 
-    expect(await screen.findByText(/formato valido/i)).toBeInTheDocument();
+    expect(await screen.findByText(/formato válido/i)).toBeInTheDocument();
     expect(loginMock).not.toHaveBeenCalled();
   });
 
@@ -59,7 +59,7 @@ describe('LoginPage', () => {
     renderConProveedores(<LoginPage />);
 
     await user.type(screen.getByLabelText(/email/i), 'juan.perez@example.cl');
-    await user.type(screen.getByLabelText(/contrasena/i), 'User123!');
+    await user.type(screen.getByLabelText(/contraseña/i), 'User123!');
     await user.click(screen.getByRole('button', { name: /entrar/i }));
 
     await waitFor(() => {
@@ -76,7 +76,7 @@ describe('LoginPage', () => {
     renderConProveedores(<LoginPage />);
 
     await user.type(screen.getByLabelText(/email/i), 'juan.perez@example.cl');
-    await user.type(screen.getByLabelText(/contrasena/i), 'incorrecta');
+    await user.type(screen.getByLabelText(/contraseña/i), 'incorrecta');
     await user.click(screen.getByRole('button', { name: /entrar/i }));
 
     const alerta = await screen.findByRole('alert');
@@ -92,11 +92,11 @@ describe('LoginPage', () => {
     renderConProveedores(<LoginPage />);
 
     await user.type(screen.getByLabelText(/email/i), 'juan.perez@example.cl');
-    await user.type(screen.getByLabelText(/contrasena/i), 'incorrecta');
+    await user.type(screen.getByLabelText(/contraseña/i), 'incorrecta');
     await user.click(screen.getByRole('button', { name: /entrar/i }));
 
     await screen.findByRole('alert');
-    expect(screen.getByLabelText(/contrasena/i)).toHaveValue('');
+    expect(screen.getByLabelText(/contraseña/i)).toHaveValue('');
   });
 
   it('informa cuando el servidor no responde', async () => {
@@ -108,7 +108,7 @@ describe('LoginPage', () => {
     renderConProveedores(<LoginPage />);
 
     await user.type(screen.getByLabelText(/email/i), 'juan.perez@example.cl');
-    await user.type(screen.getByLabelText(/contrasena/i), 'User123!');
+    await user.type(screen.getByLabelText(/contraseña/i), 'User123!');
     await user.click(screen.getByRole('button', { name: /entrar/i }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/no se pudo conectar/i);
@@ -122,6 +122,6 @@ describe('LoginPage', () => {
     await user.click(botones[0]!);
 
     expect(screen.getByLabelText(/email/i)).toHaveValue('admin@prontopaga.cl');
-    expect(screen.getByLabelText(/contrasena/i)).toHaveValue('Admin123!');
+    expect(screen.getByLabelText(/contraseña/i)).toHaveValue('Admin123!');
   });
 });

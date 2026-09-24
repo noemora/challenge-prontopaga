@@ -21,7 +21,7 @@ export function authorizeRutAccess(req: Request, _res: Response, next: NextFunct
 
   if (!auth) {
     // Defensa en profundidad: no deberia ocurrir si `authenticate` corrio antes.
-    next(unauthorized('TOKEN_MISSING', 'Se requiere autenticacion.'));
+    next(unauthorized('TOKEN_MISSING', 'Se requiere autenticación.'));
     return;
   }
 

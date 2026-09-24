@@ -20,7 +20,7 @@ const loginRateLimiter = rateLimit({
   message: {
     error: {
       code: 'TOO_MANY_LOGIN_ATTEMPTS',
-      message: 'Demasiados intentos de inicio de sesion. Espera un momento antes de reintentar.',
+      message: 'Demasiados intentos de inicio de sesión. Espera un momento antes de reintentar.',
     },
   },
 });

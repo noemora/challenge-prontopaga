@@ -30,7 +30,7 @@ describe('ScorePage — rol user', () => {
   it('explica que solo puede consultar su propio RUT', () => {
     renderConProveedores(<ScorePage />);
 
-    expect(screen.getByText(/unicamente el RUT asociado a tu cuenta/i)).toBeInTheDocument();
+    expect(screen.getByText(/únicamente el RUT asociado a tu cuenta/i)).toBeInTheDocument();
   });
 
   it('muestra el score cuando la consulta es exitosa', async () => {
@@ -97,7 +97,7 @@ describe('ScorePage — rol user', () => {
       await user.type(campo, '12.345.678-9');
       await user.click(screen.getByRole('button', { name: /consultar score/i }));
 
-      expect(await screen.findByText(/digito verificador no corresponde/i)).toBeInTheDocument();
+      expect(await screen.findByText(/dígito verificador no corresponde/i)).toBeInTheDocument();
       expect(screen.getByText(/"5"/)).toBeInTheDocument();
       expect(fetchScoreMock).not.toHaveBeenCalled();
     });

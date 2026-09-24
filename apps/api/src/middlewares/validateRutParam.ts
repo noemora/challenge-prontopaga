@@ -37,7 +37,7 @@ export function validateRutParam(req: Request, _res: Response, next: NextFunctio
  */
 function buildMessage(error: InvalidRutError): string {
   if (error.code === 'RUT_INVALID_DV' && error.expectedDv) {
-    return `El RUT ingresado no es valido: el digito verificador no corresponde al cuerpo (el esperado es "${error.expectedDv}").`;
+    return `El RUT ingresado no es válido: el dígito verificador no corresponde al cuerpo (el esperado es "${error.expectedDv}").`;
   }
-  return `El RUT ingresado no es valido: ${error.message}`;
+  return `El RUT ingresado no es válido: ${error.message}`;
 }

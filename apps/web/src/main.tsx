@@ -7,7 +7,7 @@ import './index.css';
 
 const contenedor = document.getElementById('root');
 if (!contenedor) {
-  throw new Error('No se encontro el elemento #root en index.html.');
+  throw new Error('No se encontró el elemento #root en index.html.');
 }
 
 createRoot(contenedor).render(

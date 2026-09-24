@@ -17,7 +17,7 @@ export const loginSchema = z.object({
     .trim()
     .min(1, 'El email es obligatorio.')
     .max(254, 'El email es demasiado largo.')
-    .email('El email no tiene un formato valido.'),
+    .email('El email no tiene un formato válido.'),
   password: z
     .string({ required_error: 'La contraseña es obligatoria.' })
     .min(1, 'La contraseña es obligatoria.')

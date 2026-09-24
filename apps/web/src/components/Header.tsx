@@ -18,7 +18,7 @@ export function Header() {
           <span>{session.user.email}</span>
           <span className="etiqueta">{session.user.role}</span>
           <button type="button" className="boton boton--secundario" onClick={() => cerrarSesion()}>
-            Cerrar sesion
+            Cerrar sesión
           </button>
         </div>
       ) : null}
