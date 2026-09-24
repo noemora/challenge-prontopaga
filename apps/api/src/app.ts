@@ -8,6 +8,7 @@ import { logger } from './config/logger.js';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js';
 import { authRouter } from './routes/auth.routes.js';
 import { healthRouter } from './routes/health.routes.js';
+import { scoreRouter } from './routes/score.routes.js';
 
 /**
  * Limite global de peticiones.
@@ -75,6 +76,7 @@ export function createApp(): Express {
 
   app.use(healthRouter);
   app.use(authRouter);
+  app.use(scoreRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
