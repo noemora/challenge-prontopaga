@@ -17,8 +17,8 @@
     "test": "npm run build:shared && npm run test --workspaces --if-present",
     "test:coverage": "npm run build:shared && npm run test:coverage --workspaces --if-present",
     "typecheck": "npm run build:shared && npm run typecheck --workspaces --if-present",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "npm run build:shared && eslint .",
+    "lint:fix": "npm run build:shared && eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
