@@ -131,22 +131,22 @@ hueco se abriría solo. Un módulo único lo hace imposible por construcción.
 | Caso                             | Esperado          | Cubierto en            |
 | -------------------------------- | ----------------- | ---------------------- |
 | DV incorrecto                    | 400 + DV esperado | `score.routes.test.ts` |
-| Cuerpo con letras                | 400               | `index.test.ts`        |
-| DV distinto de dígito o `K`      | 400               | `index.test.ts`        |
-| Cuerpo demasiado corto o largo   | 400               | `index.test.ts`        |
-| RUT vacío                        | 400               | `index.test.ts`        |
-| DV `K` y DV `0` (casos borde)    | válidos           | `index.test.ts`        |
+| Cuerpo con letras                | 400               | `index.test.ts` (unit) |
+| DV distinto de dígito o `K`      | 400               | `index.test.ts` (unit) |
+| Cuerpo demasiado corto o largo   | 400               | `index.test.ts` (unit) |
+| RUT vacío                        | 400               | `index.test.ts` (unit) |
+| DV `K` y DV `0` (casos borde)    | válidos           | `index.test.ts` (unit) |
 | RUT inválido con token de `user` | **400**, no 403   | `score.routes.test.ts` |
 
 ### Score
 
-| Caso                            | Esperado              | Cubierto en     |
-| ------------------------------- | --------------------- | --------------- |
-| Mismo RUT, muchas llamadas      | mismo valor           | `score.test.ts` |
-| Mismo RUT en distintos formatos | mismo valor           | `score.test.ts` |
-| RUT distintos                   | valores dispersos     | `score.test.ts` |
-| Rango                           | entero en `[0, 100]`  | `score.test.ts` |
-| Extremos alcanzables (0 y 100)  | sí, en muestra amplia | `score.test.ts` |
+| Caso                            | Esperado              | Cubierto en            |
+| ------------------------------- | --------------------- | ---------------------- |
+| Mismo RUT, muchas llamadas      | mismo valor           | `score.test.ts` (unit) |
+| Mismo RUT en distintos formatos | mismo valor           | `score.test.ts` (unit) |
+| RUT distintos                   | valores dispersos     | `score.test.ts` (unit) |
+| Rango                           | entero en `[0, 100]`  | `score.test.ts` (unit) |
+| Extremos alcanzables (0 y 100)  | sí, en muestra amplia | `score.test.ts` (unit) |
 
 ### Frontend
 

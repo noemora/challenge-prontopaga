@@ -18,7 +18,7 @@ basada en roles. Desafío técnico para **ProntoPaga / YOL1**.
 
 ## Puesta en marcha
 
-Requiere **Node.js 20.10 o superior**. No hace falta base de datos ni ningún
+Requiere **Node.js 20.19 o superior** (lo exige Vite 7). No hace falta base de datos ni ningún
 servicio externo.
 
 ```bash
@@ -39,12 +39,27 @@ paralelo.
 uno con:
 
 ```bash
+# Con Node (multiplataforma)
 node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"
+
+# O con OpenSSL, si lo tienes a mano
+openssl rand -base64 48
 ```
 
 Si falta o es demasiado corto, **la API no arranca** y explica por qué. Es
 deliberado: un valor por defecto silencioso para un secreto de firma es una
 vulnerabilidad disfrazada de comodidad.
+
+### Variables de entorno
+
+La API se configura con `apps/api/.env` (plantilla en `.env.example`). Las
+relevantes: `JWT_SECRET` (obligatoria), `JWT_EXPIRES_IN`, `CORS_ORIGINS`,
+`TRUST_PROXY` —dejar vacía salvo que haya un balanceador por delante— y los
+límites de `LOGIN_RATE_LIMIT_*`.
+
+La SPA solo usa `VITE_API_BASE_URL` (plantilla en `apps/web/.env.example`), que
+por defecto apunta a `http://localhost:3000`; no hace falta tocarla para
+ejecutar el proyecto en local.
 
 ### Credenciales de prueba
 
@@ -67,7 +82,7 @@ aunque el directorio sea simulado.
 | Comando                 | Qué hace                                     |
 | ----------------------- | -------------------------------------------- |
 | `npm run dev`           | Levanta API y SPA en paralelo                |
-| `npm test`              | Ejecuta las 111 pruebas de los tres paquetes |
+| `npm test`              | Ejecuta las 116 pruebas de los tres paquetes |
 | `npm run test:coverage` | Pruebas con informe de cobertura             |
 | `npm run typecheck`     | Verificación de tipos sin emitir             |
 | `npm run lint`          | ESLint con reglas basadas en tipos           |
@@ -143,6 +158,10 @@ distinguir entre formatos:
 | `ROUTE_NOT_FOUND`         | 404  | Ruta inexistente                              |
 | `TOO_MANY_LOGIN_ATTEMPTS` | 429  | Se superó el límite de intentos de login      |
 | `TOO_MANY_REQUESTS`       | 429  | Se superó el límite global                    |
+| `PAYLOAD_TOO_LARGE`       | 413  | El cuerpo supera el límite de 10 kB           |
+| `UNSUPPORTED_ENCODING`    | 415  | `Content-Encoding` no soportado               |
+| `UNSUPPORTED_CHARSET`     | 415  | Juego de caracteres no soportado              |
+| `REQUEST_ABORTED`         | 400  | La petición se cortó antes de completarse     |
 | `INTERNAL_ERROR`          | 500  | Error inesperado (sin detalles en producción) |
 
 ---
@@ -169,7 +188,7 @@ Para que el rechazo no sea una pared, la respuesta indica el DV esperado:
 {
   "error": {
     "code": "RUT_INVALID",
-    "message": "El RUT ingresado no es valido: el digito verificador no corresponde al cuerpo (el esperado es \"5\").",
+    "message": "El RUT ingresado no es válido: el dígito verificador no corresponde al cuerpo (el esperado es \"5\").",
     "details": { "reason": "RUT_INVALID_DV" }
   }
 }
@@ -289,38 +308,44 @@ un control de seguridad**: quien autoriza de verdad es la API en cada petición.
 
 Referencias a **OWASP Top 10**, aplicadas a lo que el alcance permite.
 
-| Medida                                                           | Contra                                    |
-| ---------------------------------------------------------------- | ----------------------------------------- |
-| Algoritmo fijado a HS256 + `iss`/`aud` obligatorios              | Confusión de algoritmo, `alg: none`       |
-| Tokens de vida corta (15 min por defecto)                        | Ventana de uso de un token robado         |
-| Respuesta y **latencia** idénticas ante email o contraseña malos | Enumeración de cuentas (A07)              |
-| bcrypt coste 10 incluso para credenciales mock                   | Contraseñas en claro                      |
-| Límite de 10 intentos/min en `/login`                            | Fuerza bruta, credential stuffing (A07)   |
-| Límite de 200 caracteres en la contraseña                        | DoS por coste de bcrypt                   |
-| Validación Zod que descarta campos no declarados                 | Mass assignment (A08)                     |
-| `JWT_SECRET` obligatorio y validado al arranque                  | Secretos por defecto (A05)                |
-| `.env` excluido del control de versiones                         | Filtración de secretos                    |
-| CORS con lista blanca explícita, sin comodines                   | Uso de la API desde orígenes no previstos |
-| `helmet` y `X-Powered-By` eliminado                              | Cabeceras faltantes, revelar tecnología   |
-| Cuerpo limitado a 10 kB                                          | DoS por payload grande                    |
-| Errores genéricos en producción, sin stack traces                | Fuga de información (A05)                 |
-| Logs con `Authorization`, cookies y contraseñas redactados       | Filtración de credenciales por los logs   |
-| El 403 no devuelve score, fecha ni el RUT consultado             | Confirmar datos de un titular ajeno       |
+| Medida                                                           | Contra                                     |
+| ---------------------------------------------------------------- | ------------------------------------------ |
+| Algoritmo fijado a HS256 + `iss`/`aud` obligatorios              | Confusión de algoritmo, `alg: none`        |
+| Tokens de vida corta (15 min por defecto)                        | Ventana de uso de un token robado          |
+| Respuesta y **latencia** idénticas ante email o contraseña malos | Enumeración de cuentas (A07)               |
+| bcrypt coste 10 incluso para credenciales mock                   | Contraseñas en claro                       |
+| Límite de 10 intentos/min en `/login`                            | Fuerza bruta, credential stuffing (A07)    |
+| Límite de 200 caracteres en la contraseña                        | DoS por coste de bcrypt                    |
+| Validación Zod que descarta campos no declarados                 | Mass assignment (A08)                      |
+| `JWT_SECRET` obligatorio y validado al arranque                  | Secretos por defecto (A05)                 |
+| `.env` excluido del control de versiones                         | Filtración de secretos                     |
+| CORS con lista blanca explícita, sin comodines                   | Uso de la API desde orígenes no previstos  |
+| `helmet` y `X-Powered-By` eliminado                              | Cabeceras faltantes, revelar tecnología    |
+| Cuerpo limitado a 10 kB                                          | DoS por payload grande                     |
+| `Cache-Control: no-store` y sin `ETag` en toda la API            | Que el score o el JWT queden en una caché  |
+| Errores de cuerpo mapeados a 4xx y registrados a nivel `debug`   | Inundación del log sin autenticarse        |
+| Parseo del cuerpo **después** del rate limiter                   | Abuso del límite de tamaño como DoS        |
+| `exp` obligatorio al verificar el token                          | Tokens sin caducidad válidos para siempre  |
+| `trust proxy` desactivado salvo configuración explícita          | Falsificar la IP para evadir el rate limit |
+| Errores genéricos en producción, sin stack traces                | Fuga de información (A05)                  |
+| Logs con `Authorization`, cookies y contraseñas redactados       | Filtración de credenciales por los logs    |
+| El 403 no devuelve score, fecha ni el RUT consultado             | Confirmar datos de un titular ajeno        |
 
-`npm audit --omit=dev` reporta **0 vulnerabilidades**. Durante el desarrollo se
-subieron vitest y vite a versiones parcheadas para dejar también en cero la
-auditoría completa.
+`npm audit --omit=dev` reporta **0 vulnerabilidades**, y la auditoría completa
+—incluidas las dependencias de desarrollo— también. Las versiones de vitest y
+vite fijadas en el `package.json` son las parcheadas: la cadena de herramientas
+se eligió ya saneada en lugar de arrastrar avisos conocidos.
 
 ---
 
 ## Pruebas
 
-**111 pruebas**, todas en verde:
+**116 pruebas**, todas en verde:
 
 | Paquete        | Nº  | Qué cubren                                                    |
 | -------------- | --- | ------------------------------------------------------------- |
 | `packages/rut` | 33  | Módulo 11, casos borde `K` y `0`, formatos, códigos de error  |
-| `apps/api`     | 58  | Login, JWT, autorización, validación, rate limiting, contrato |
+| `apps/api`     | 63  | Login, JWT, autorización, validación, rate limiting, contrato |
 | `apps/web`     | 20  | Formularios, errores, validación local, expiración de sesión  |
 
 ```bash
@@ -366,6 +391,18 @@ Fuera del alcance de un MVP de 3 horas, pero parte de la conversación técnica:
   quién consultó qué RUT y cuándo es un requisito regulatorio.
 - **Rate limiting distribuido** con Redis: el actual vive en memoria y no
   sobrevive a varias instancias.
+- **Gestión del estado de servidor con React Query.** La SPA tiene una única
+  consulta, y resolverla con `useState` más `AbortController` es proporcional al
+  problema. En cuanto varias vistas comparten datos, la caché compartida, la
+  invalidación y los reintentos dejan de ser triviales de mantener a mano, y ahí
+  React Query pasa de ser peso a ser ahorro.
+- **Caché del score.** Aquí el score es una función pura del RUT: cachear un
+  SHA-256 costaría más que recalcularlo. En un sistema real el dato vendría de un
+  buró de crédito externo, con latencia y costo por consulta, y ahí una caché con
+  TTL corto e invalidación explícita deja de ser una optimización para ser un
+  requisito. La caché correcta es del lado servidor: en el navegador estas
+  respuestas deben seguir yendo con `Cache-Control: no-store`, por tratarse de
+  datos personales.
 - **Secretos en un gestor** (AWS Secrets Manager, Vault) en lugar de variables de
   entorno planas.
 

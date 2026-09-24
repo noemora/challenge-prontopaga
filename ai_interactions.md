@@ -72,8 +72,10 @@ capturada en ese instante.
 Salió a la luz al ejecutar las pruebas, que registraron una excepción no
 capturada aunque las aserciones pasaran. Se corrigió dividiendo la vista en
 `ScorePage` (comprueba la sesión y redirige) y `ScoreForm` (recibe una sesión
-garantizada), eliminando toda aserción non-null en lugar de silenciar el
-síntoma.
+garantizada), eliminando la aserción non-null en lugar de silenciar el síntoma.
+La auditoría posterior encontró que quedaba otra en el backend
+(`score.routes.ts`); también se sustituyó por una comprobación explícita, de modo
+que hoy no queda ninguna en código de producción.
 
 ### 3. Promesas sin dueño en los formularios
 
@@ -124,6 +126,69 @@ Tres, corregidos en su origen y no con un `any`:
   forma inesperada como entrada inválida en lugar de forzar la conversión.
 - El middleware de autorización volvía a leer el parámetro crudo en vez de usar
   el RUT ya normalizado; se unificó la fuente del dato.
+
+## Auditoría previa a la entrega
+
+Antes de publicar el repositorio se lanzó una revisión en tres frentes
+independientes —cumplimiento del enunciado, seguridad adversarial y veracidad de
+la documentación— con instrucciones de verificar contra el código y contra la
+aplicación en ejecución, nunca contra lo que afirmaban los documentos.
+
+Lo que confirmó:
+
+- Ningún incumplimiento funcional del enunciado.
+- **Ningún bypass del control de acceso.** Se intentó con variantes de formato,
+  codificación de URL, recorrido de rutas, parámetros matriz, bytes nulos, 18
+  separadores Unicode distintos, homoglifos de la letra K, dígitos no ASCII,
+  hasta mil ceros a la izquierda y contaminación de prototipo. Todos devolvieron
+  403 o 401. Se comprobó además, por fuzzing, que la normalización del RUT es
+  idempotente y libre de colisiones, que es la propiedad de la que depende todo
+  el esquema de autorización.
+
+Lo que encontró, y se corrigió antes de entregar:
+
+1. **`npm run test:coverage` fallaba en los tres paquetes.** `@vitest/coverage-v8`
+   estaba declarado en los workspaces mientras `vitest` vivía en la raíz, y el
+   lockfile fijaba esa disposición: cualquier clon limpio reproducía el fallo. El
+   comando estaba documentado dos veces en el README. Es el mismo tipo de error
+   de resolución descrito en los puntos 6 y 8 de arriba, lo que confirma que un
+   fallo corregido en un sitio no queda cerrado en los demás. Ahora la CI ejecuta
+   `test:coverage` en lugar de `npm test`, para que se rompa aquí y no en la
+   máquina de quien clone el repositorio.
+2. **El mínimo de Node declarado era falso**: se anunciaba 20.10 cuando Vite 7
+   exige 20.19. Quien siguiera el README con un Node 20.1x chocaba en el primer
+   comando.
+3. **Los errores de `body-parser` se respondían como 500** y, fuera de
+   producción, con el mensaje interno incluido. El límite de 10 kB —que es un
+   control anti-DoS— se reportaba como fallo del servidor, y cada petición
+   malformada escribía un stack completo en el log sin autenticación previa. Se
+   mapearon a 413, 415 y 400, y se bajaron a nivel `debug`.
+4. **El parseo del cuerpo corría antes del rate limiter**, así que un cuerpo
+   grande generaba el error antes de que ningún límite pudiera frenarlo: la
+   propia protección era el vector de abuso. Se invirtió el orden.
+5. **Faltaba `Cache-Control: no-store`** en respuestas que llevan un JWT o el
+   score de una persona, y Express añadía un `ETag` que las hacía revalidables.
+6. **`exp` no era obligatorio** al verificar el token: uno emitido sin
+   expiración se aceptaba indefinidamente, lo que contradecía la vigencia de 15
+   minutos que promete el README.
+7. **CORS solo admitía `localhost`**, no `127.0.0.1`. El navegador los trata como
+   orígenes distintos, así que abrir la SPA por la IP dejaba la aplicación
+   mostrando un "no se pudo conectar" indistinguible de un servidor caído.
+8. **El esquema `Bearer` se comparaba distinguiendo mayúsculas**, cuando el RFC
+   7235 lo define insensible a la caja.
+9. **Una respuesta 200 sin cuerpo dejaba la interfaz sin resultado ni error**: el
+   cliente devolvía `null` y la vista no mostraba nada.
+10. **Los textos visibles iban sin tildes** mientras los mensajes del servidor sí
+    las llevaban, de modo que convivían en la misma pantalla la etiqueta
+    "Contrasena" y el error "Email o contraseña incorrectos".
+11. **Una afirmación del README no era verificable** desde el repositorio: decía
+    que se habían actualizado vitest y vite a versiones parcheadas, pero eso
+    ocurrió antes del primer commit y no hay rastro en el historial. Se reformuló
+    para describir el estado actual en lugar de un hito no comprobable.
+
+Cada corrección de seguridad lleva su prueba de regresión: el 413, la cabecera
+`no-store`, el esquema `Bearer` en minúsculas y el token sin `exp` fallan la
+suite si alguien los revierte.
 
 ## Verificación independiente
 
