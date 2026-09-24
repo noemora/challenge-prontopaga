@@ -1,0 +1,27 @@
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+build/
+*.tsbuildinfo
+
+# Entorno — NUNCA commitear secretos reales
+.env
+.env.local
+.env.*.local
+
+# Tests / cobertura
+coverage/
+.vitest/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editores / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
