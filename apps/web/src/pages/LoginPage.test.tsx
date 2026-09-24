@@ -85,7 +85,9 @@ describe('LoginPage', () => {
 
   it('limpia la contrasena tras un intento fallido', async () => {
     const user = userEvent.setup();
-    loginMock.mockRejectedValue(new ApiError(401, 'INVALID_CREDENTIALS', 'Credenciales invalidas.'));
+    loginMock.mockRejectedValue(
+      new ApiError(401, 'INVALID_CREDENTIALS', 'Credenciales invalidas.'),
+    );
 
     renderConProveedores(<LoginPage />);
 

@@ -82,9 +82,7 @@ export function LoginPage() {
   return (
     <div className="tarjeta">
       <h1 className="tarjeta__titulo">Iniciar sesion</h1>
-      <p className="tarjeta__subtitulo">
-        Accede para consultar el score de riesgo financiero.
-      </p>
+      <p className="tarjeta__subtitulo">Accede para consultar el score de riesgo financiero.</p>
 
       {logoutReason ? <Alert tone="info">{logoutReason}</Alert> : null}
       {errorGeneral ? <Alert tone="error">{errorGeneral}</Alert> : null}

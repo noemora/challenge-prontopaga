@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Una rama que recibe varios push seguidos solo necesita validar el ultimo
+# commit: se cancelan las ejecuciones anteriores en curso.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calidad:
+    name: Lint, tipos, tests y build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # `npm ci` respeta el lockfile al pie de la letra: la CI instala
+      # exactamente las mismas versiones que se probaron en local.
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Verificacion de tipos
+        run: npm run typecheck
+
+      - name: Formato
+        run: npm run format:check
+
+      - name: Tests
+        run: npm test
+
+      - name: Build de produccion
+        run: npm run build
+
+  seguridad:
+    name: Auditoria de dependencias
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      # Se auditan solo las dependencias que llegan a produccion. Un fallo en la
+      # cadena de herramientas de desarrollo no debe bloquear un despliegue, pero
+      # si debe verse: por eso el paso de desarrollo informa sin fallar.
+      - name: Vulnerabilidades en dependencias de produccion
+        run: npm audit --omit=dev --audit-level=moderate
+
+      - name: Vulnerabilidades en dependencias de desarrollo (informativo)
+        run: npm audit --audit-level=high || true

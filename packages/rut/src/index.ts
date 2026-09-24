@@ -15,11 +15,7 @@ const MIN_BODY_LENGTH = 7;
 const MAX_BODY_LENGTH = 8;
 
 /** Motivos por los que un RUT puede ser rechazado. */
-export type RutErrorCode =
-  | 'RUT_EMPTY'
-  | 'RUT_MALFORMED'
-  | 'RUT_OUT_OF_RANGE'
-  | 'RUT_INVALID_DV';
+export type RutErrorCode = 'RUT_EMPTY' | 'RUT_MALFORMED' | 'RUT_OUT_OF_RANGE' | 'RUT_INVALID_DV';
 
 /** Error de dominio con causa tipada, para que la capa HTTP elija el mensaje. */
 export class InvalidRutError extends Error {
@@ -103,7 +99,10 @@ export function parseRut(input: string): ParsedRut {
     throw new InvalidRutError('RUT_MALFORMED', 'El cuerpo del RUT solo puede contener digitos.');
   }
   if (!/^[\dK]$/.test(dv)) {
-    throw new InvalidRutError('RUT_MALFORMED', 'El digito verificador debe ser un numero o la letra K.');
+    throw new InvalidRutError(
+      'RUT_MALFORMED',
+      'El digito verificador debe ser un numero o la letra K.',
+    );
   }
 
   // Los ceros a la izquierda no cambian el RUT; normalizarlos impide que

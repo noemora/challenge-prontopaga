@@ -28,7 +28,9 @@ export function signAccessToken(subject: TokenSubject): string {
   // asociado a la sesion, y omitirlo evita que el front lo interprete como
   // "RUT por defecto" al consultar.
   const payload: Omit<AccessTokenPayload, 'sub'> =
-    subject.role === 'user' && subject.rut ? { role: subject.role, rut: subject.rut } : { role: subject.role };
+    subject.role === 'user' && subject.rut
+      ? { role: subject.role, rut: subject.rut }
+      : { role: subject.role };
 
   return jwt.sign(payload, env.JWT_SECRET, {
     algorithm: ALGORITHM,

@@ -51,11 +51,7 @@ describe('ScorePage — rol user', () => {
   it('muestra un mensaje claro cuando el RUT no esta permitido', async () => {
     const user = userEvent.setup();
     fetchScoreMock.mockRejectedValue(
-      new ApiError(
-        403,
-        'RUT_FORBIDDEN',
-        'No tienes permiso para consultar el score de otro RUT.',
-      ),
+      new ApiError(403, 'RUT_FORBIDDEN', 'No tienes permiso para consultar el score de otro RUT.'),
     );
 
     renderConProveedores(<ScorePage />);
@@ -158,9 +154,7 @@ describe('ScorePage — rol user', () => {
 
   it('cierra la sesion cuando el token expiro', async () => {
     const user = userEvent.setup();
-    fetchScoreMock.mockRejectedValue(
-      new ApiError(401, 'TOKEN_EXPIRED', 'La sesion expiro.'),
-    );
+    fetchScoreMock.mockRejectedValue(new ApiError(401, 'TOKEN_EXPIRED', 'La sesion expiro.'));
 
     renderConProveedores(<ScorePage />);
     await user.click(screen.getByRole('button', { name: /consultar score/i }));

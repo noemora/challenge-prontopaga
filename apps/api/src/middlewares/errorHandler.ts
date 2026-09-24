@@ -45,7 +45,11 @@ export function errorHandler(
   }
 
   // JSON malformado en el body: body-parser lanza un SyntaxError con `status`.
-  if (error instanceof SyntaxError && 'status' in error && (error as { status: number }).status === 400) {
+  if (
+    error instanceof SyntaxError &&
+    'status' in error &&
+    (error as { status: number }).status === 400
+  ) {
     res.status(400).json({
       error: { code: 'INVALID_JSON', message: 'El cuerpo de la peticion no es JSON valido.' },
     });
