@@ -72,7 +72,7 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     throw new ApiError(
       0,
       'NETWORK_ERROR',
-      'No se pudo conectar con el servidor. Revisa tu conexion e intenta nuevamente.',
+      'No se pudo conectar con el servidor. Revisa tu conexión e intenta nuevamente.',
     );
   }
 
@@ -83,8 +83,19 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     throw new ApiError(
       response.status,
       parsed?.error?.code ?? 'UNKNOWN_ERROR',
-      parsed?.error?.message ?? 'Ocurrio un error inesperado. Intenta nuevamente.',
+      parsed?.error?.message ?? 'Ocurrió un error inesperado. Intenta nuevamente.',
       parsed?.error?.details,
+    );
+  }
+
+  // Una respuesta correcta sin cuerpo utilizable no es un exito silencioso: sin
+  // esta comprobacion, `payload` seria null, la vista mostraria ni resultado ni
+  // error, y el usuario veria que "no paso nada" tras pulsar el boton.
+  if (payload === null) {
+    throw new ApiError(
+      response.status,
+      'EMPTY_RESPONSE',
+      'El servidor respondió sin datos. Intenta nuevamente.',
     );
   }
 
