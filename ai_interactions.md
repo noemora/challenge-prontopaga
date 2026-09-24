@@ -216,10 +216,21 @@ confirma el determinismo de punta a punta.
 
 ## Nota sobre el enfoque
 
-El enunciado y la descripción del cargo insisten en comprender el código
-generado y no caer en _vibe coding_. Este repositorio se construyó con ese
-criterio: puedo explicar por qué cada middleware está en el orden en que está,
-por qué el score usa un hash y no un PRNG con semilla, qué ataque concreto cierra
-cada medida de seguridad y cuáles son las limitaciones conocidas de la solución
-—empezando por el almacenamiento del token en `sessionStorage`, documentada en el
-README junto con la alternativa correcta para producción.
+El enunciado y la descripción del cargo insisten en comprender el código generado
+y no caer en _vibe coding_. Lo que este repositorio puede acreditar es que
+**ninguna decisión se tomó por inercia**: el orden de los middlewares, la elección
+de una función hash frente a un generador pseudoaleatorio, el ataque concreto que
+cierra cada medida de seguridad y las limitaciones asumidas están razonados por
+escrito en el README y en [`ANALISIS.md`](./ANALISIS.md), y cada uno de esos
+razonamientos tiene detrás una ejecución que lo verifica.
+
+El trabajo se hizo con un asistente escribiendo la mayor parte del código bajo mi
+dirección, y la revisión se apoyó en la ejecución —pruebas automatizadas,
+peticiones reales con `curl`, recorrido de la aplicación en un navegador y una
+auditoría posterior en tres frentes— más que en la lectura línea por línea. Las
+decisiones de criterio, el alcance y la aceptación de cada commit fueron mías.
+
+Las limitaciones conocidas están documentadas antes de que nadie tenga que
+encontrarlas: el token en `sessionStorage` en lugar de una cookie `httpOnly`, el
+rate limiting en memoria que no sobrevive a varias instancias, la ausencia de
+registro de auditoría y el sesgo despreciable del módulo en el cálculo del score.

@@ -264,16 +264,16 @@ fuera del alcance y documentado en el README.
 
 ## 6. Decisiones con sus contrapartidas
 
-| Decisión                           | A favor                                                    | En contra                                      |
-| ---------------------------------- | ---------------------------------------------------------- | ---------------------------------------------- |
-| Monorepo con paquete compartido    | Imposible que cliente y API diverjan en el RUT             | Un paso de build extra                         |
-| npm workspaces (no pnpm/yarn)      | `npm install && npm run dev` sin instalar nada más         | Hoisting menos predecible                      |
-| Express 5                          | El enunciado habla de "middlewares"; errores async nativos | Ecosistema de tipos algo menos maduro          |
-| Hash en vez de PRNG con semilla    | Sin estado, reproducible entre máquinas y reinicios        | Sesgo de módulo despreciable                   |
-| Context API en vez de Redux        | Proporcionado al alcance: dos vistas, un dato              | Habría que revisarlo si el estado creciera     |
-| Rutas en la raíz (sin `/api/v1`)   | Respeta el contrato del enunciado al pie de la letra       | No es lo que haría en producción               |
-| Campo de RUT editable para `user`  | Hace alcanzable el error que el enunciado pide cubrir      | Permite un 403 "autoinfligido"                 |
-| Validación de RUT en cliente y API | Respuesta inmediata sin perder la barrera real             | Lógica en dos sitios (mitigado por el paquete) |
+| Decisión                                 | A favor                                                    | En contra                                      |
+| ---------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------- |
+| Monorepo con paquete compartido          | Imposible que cliente y API diverjan en el RUT             | Un paso de build extra                         |
+| npm workspaces (no pnpm/yarn)            | `npm install && npm run dev` sin instalar nada más         | Hoisting menos predecible                      |
+| Express 5                                | El enunciado habla de "middlewares"; errores async nativos | Ecosistema de tipos algo menos maduro          |
+| Hash en vez de generador pseudoaleatorio | Sin estado, reproducible entre máquinas y reinicios        | Sesgo de módulo despreciable                   |
+| Context API en vez de Redux              | Proporcionado al alcance: dos vistas, un dato              | Habría que revisarlo si el estado creciera     |
+| Rutas en la raíz (sin `/api/v1`)         | Respeta el contrato del enunciado al pie de la letra       | No es lo que haría en producción               |
+| Campo de RUT editable para `user`        | Hace alcanzable el error que el enunciado pide cubrir      | Permite un 403 "autoinfligido"                 |
+| Validación de RUT en cliente y API       | Respuesta inmediata sin perder la barrera real             | Lógica en dos sitios (mitigado por el paquete) |
 
 ---
 

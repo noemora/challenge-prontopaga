@@ -270,7 +270,7 @@ falta de permisos inexistente y dejaría al usuario sin saber qué corregir.
 El score sale de `SHA-256` sobre la forma canónica del RUT, tomando los primeros
 4 bytes como entero sin signo y aplicando módulo 101 para cubrir `[0, 100]`.
 
-Frente a un generador pseudoaleatorio con semilla, el hash no necesita estado, es
+Frente a un generador pseudoaleatorio inicializado con el propio RUT, el hash no necesita estado, es
 estable entre procesos, reinicios y máquinas, y es **reproducible** por quien
 evalúe. No lleva sal ni secreto: el score es un dato del dominio, no una
 credencial.

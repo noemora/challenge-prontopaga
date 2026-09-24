@@ -11,9 +11,10 @@ const SCORE_BUCKETS = SCORE_MAX - SCORE_MIN + 1; // 101
  * Calcula el score crediticio de un RUT.
  *
  * Requisito del desafio: el resultado debe ser DETERMINISTA por RUT y variar
- * entre RUT distintos. Se resuelve con una funcion hash en vez de un PRNG con
- * semilla porque el hash no necesita estado, es estable entre procesos,
- * reinicios y maquinas, y distribuye de forma uniforme.
+ * entre RUT distintos. Se resuelve con una funcion hash en vez de un generador
+ * pseudoaleatorio inicializado con el RUT, porque el hash no necesita estado,
+ * es estable entre procesos, reinicios y maquinas, y distribuye de forma
+ * uniforme.
  *
  * Detalles de implementacion relevantes:
  *
