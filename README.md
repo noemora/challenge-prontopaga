@@ -7,6 +7,13 @@ basada en roles. Desafío técnico para **ProntoPaga / YOL1**.
 - **Frontend:** SPA en React 19 + TypeScript (Vite).
 - **Compartido:** paquete de validación de RUT chileno usado por ambos.
 
+### Documentos
+
+| Documento                                    | Contenido                                                        |
+| -------------------------------------------- | ---------------------------------------------------------------- |
+| [`ANALISIS.md`](./ANALISIS.md)               | Análisis previo: casos contemplados, puntos débiles y decisiones |
+| [`ai_interactions.md`](./ai_interactions.md) | Uso de IA: qué se delegó, qué se corrigió y cómo se verificó     |
+
 ---
 
 ## Puesta en marcha
@@ -209,6 +216,9 @@ Se usa **npm workspaces** y no pnpm o Yarn para que el proyecto se levante con
 ---
 
 ## Decisiones técnicas
+
+El razonamiento completo —incluidos los casos contemplados y los puntos
+débiles asumidos— está en [`ANALISIS.md`](./ANALISIS.md). Aquí va lo esencial.
 
 ### El punto más delicado: comparar RUT, no cadenas
 
