@@ -6,6 +6,7 @@ import { pinoHttp } from 'pino-http';
 import { env, isTest } from './config/env.js';
 import { logger } from './config/logger.js';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js';
+import { authRouter } from './routes/auth.routes.js';
 import { healthRouter } from './routes/health.routes.js';
 
 /**
@@ -73,6 +74,7 @@ export function createApp(): Express {
   app.use(globalRateLimiter);
 
   app.use(healthRouter);
+  app.use(authRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
